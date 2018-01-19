@@ -73,3 +73,4 @@ get_one_coin <- function(coin){
 
 
 my_df_list <- rbindlist(lapply(adat[start_date>=Sys.Date()- lubridate::days(90),]$symbol, get_one_coin))
+write.csv(my_df_list, "data.csv")
