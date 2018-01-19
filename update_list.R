@@ -11,7 +11,7 @@ d$help <- gsub('/','_', d$id)
 d$help<-substr(d$help, 2, nchar(d$help)-1)
 
 
-mar_meglevok <- list.files("/home/misrori/Desktop/crypto_market_analysis/filok/")
+mar_meglevok <- list.files("~/Desktop/crypto_market_analysis/filok/")
 vannak <- sapply(strsplit(mar_meglevok, ".", fixed = T), "[[", 1)
 
 ezeket <- d[help%in%vannak==F,]
@@ -36,7 +36,7 @@ for(i in ezeket$id){
   szoveg <-as.character(webElem$getElementText()[[1]])
   szoveg <-gsub("\n", '',szoveg)
   t<- data.table('id'=i, 'date'=szoveg)
-  write.csv(t, paste0('/home/misrori/Desktop/crypto_market_analysis/filok/', fname, ".csv"), row.names = F)
+  write.csv(t, paste0('~/Desktop/crypto_market_analysis/filok/', fname, ".csv"), row.names = F)
 }
 
 
