@@ -1,16 +1,6 @@
 library(data.table)
 library(jsonlite)
 
-get_coin_hist_data <- function(coin_list,agg_time){
-  
-  adat<-data.table()
-  for(i in coin_list){
-    print(i)
-    adat <- rbind(adat, get_one_coin(i,agg_time))
-  }
-  return(adat)
-}
-
 
 adat <- data.table(rbindlist(lapply(paste0('~/Desktop/crypto_market_analysis/filok/', list.files('~/Desktop/crypto_market_analysis/filok/')),fread)))
 setkey(adat, id)
@@ -55,22 +45,36 @@ setorder(adat, start_date)
 rm(osszes)
 
 get_one_coin <- function(coin){
-  print(coin)
-  link<- paste('https://min-api.cryptocompare.com/data/histoday?fsym=',coin,'&tsym=USD&limit=120',sep ="")
-  adat <- fromJSON(link)
-  if(length(adat$Data)!=0){
-    adat<- data.table(adat$Data)
-    adat<- adat[high!=0&close!=0&low!=0,]
-    adat$time <- as.POSIXct(adat$time, origin="1970-01-01")
-    adat$symbol <- coin
-    adat <- adat[,c("symbol","time",'close')]
-    return(adat)
-  }else{
-    return(data.frame())
+  if(is.na(coin)==F){
+    link<- paste('https://min-api.cryptocompare.com/data/histoday?fsym=',coin,'&tsym=USD&limit=120',sep ="")
+    adat <- fromJSON(link)
+    if(length(adat$Data)!=0){
+      adat<- data.table(adat$Data)
+      adat<- adat[high!=0&close!=0&low!=0,]
+      adat$time <- as.POSIXct(adat$time, origin="1970-01-01")
+      adat$symbol <- coin
+      #adat <- adat[,c("symbol","time",'close')]
+      return(adat)
+    }else{
+      return(data.frame())
+    }
+    
   }
+  
 }
 
 
 
-my_df_list <- rbindlist(lapply(adat[start_date>=Sys.Date()- lubridate::days(90),]$symbol, get_one_coin))
-write.csv(my_df_list, "data.csv")
+for(i in seq(1,nrow(adat), 100)){
+  print(i)
+
+  my_df_list <- rbindlist(lapply(adat[i:(i+100),]$symbol, get_one_coin))
+  write.csv(my_df_list, paste0("data_files/data_", as.character(i), ".csv"), row.names = F)
+
+}
+
+rm(list=ls())
+md <- data.table(rbindlist(lapply(paste0('~/Desktop/crypto_market_analysis/data_files/', list.files('~/Desktop/crypto_market_analysis/data_files/')),fread)))
+
+
+
